@@ -118,9 +118,14 @@ namespace TunicArchipelago {
                 SceneLoader.LoadScene("Fortress Basement");
                 return;
             }
+            if (loadingScene.name == "Sewer" && !EnemyRandomizer.Enemies.ContainsKey("Spinnerbot Corrupted")) {
+                EnemyRandomizer.InitializeEnemies("Sewer");
+                SceneLoader.LoadScene("frog cave main");
+                return;
+            }
             if (loadingScene.name == "Atoll Redux" && !EnemyRandomizer.Enemies.ContainsKey("plover")) {
                 EnemyRandomizer.InitializeEnemies("Atoll Redux");
-                SceneLoader.LoadScene("frog cave main");
+                SceneLoader.LoadScene("Sewer");
                 return;
             }
             if (loadingScene.name == "Archipelagos Redux" && ModelSwaps.GlowEffect == null) {
@@ -277,8 +282,18 @@ namespace TunicArchipelago {
                 GameObject.Find("_Signposts/Signpost (3)/").GetComponent<Signpost>().message.text = $"#is wA too \"West Garden\"\n<#33FF33>[death] bEwAr uhv tArE [death]";
                 GameObject.Find("_Environment Special/Door (1)/door/key twist").GetComponent<MeshRenderer>().materials = ModelSwaps.Items["Key (House)"].GetComponent<MeshRenderer>().materials;
                 GameObject.Find("_Environment/_Decorations/Mailbox (1)/mailbox flag").AddComponent<MailboxFlag>();
+
                 if (SaveFile.GetInt("randomizer entrance rando enabled") == 1 || (Archipelago.instance.integration.slotData.ContainsKey("entrance_rando") && Archipelago.instance.integration.slotData["entrance_rando"].ToString() == "1" && SaveFile.GetInt("seed") == 0)) {
                     GhostHints.SpawnTorchHintGhost();
+                }
+
+                if (TunicArchipelago.Settings.ClearEarlyBushes) {
+                    int[] bushesToClear = new int[] { 7, 2, 16, 47, 42 };
+                    foreach (int bush in bushesToClear) {
+                        if (GameObject.Find($"_Bush and Grass/bush ({bush})/") != null) {
+                            GameObject.Find($"_Bush and Grass/bush ({bush})/").SetActive(false);
+                        }
+                    }
                 }
             } else if (SceneName == "Swamp Redux 2") {
                 GhostHints.SpawnCathedralDoorGhost();
@@ -430,6 +445,7 @@ namespace TunicArchipelago {
                 CapeSecret.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
                 CapeSecret.transform.GetChild(0).localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 CapeSecret.AddComponent<VisibleByNotHavingItem>().Item = Inventory.GetItemByName("Cape");
+                CapeSecret.SetActive(true);
             }
         }
 

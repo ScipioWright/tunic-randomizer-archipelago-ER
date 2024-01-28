@@ -72,6 +72,7 @@ namespace TunicArchipelago {
             OptionsGUI OptionsGUI = GameObject.FindObjectOfType<OptionsGUI>();
             OptionsGUI.setHeading("General");
             OptionsGUI.addToggle("Easier Heir Fight", "Off", "On", TunicArchipelago.Settings.HeirAssistModeEnabled ? 1 : 0, (OptionsGUIMultiSelect.MultiSelectAction)ToggleHeirAssistMode);
+            OptionsGUI.addToggle("Clear Early Bushes", "Off", "On", TunicArchipelago.Settings.ClearEarlyBushes ? 1 : 0, (OptionsGUIMultiSelect.MultiSelectAction)ToggleClearEarlyBushes);
             OptionsGUI.addToggle("Cheaper Shop Items", "Off", "On", TunicArchipelago.Settings.CheaperShopItemsEnabled ? 1 : 0, (OptionsGUIMultiSelect.MultiSelectAction)ToggleCheaperShopItems);
             OptionsGUI.addToggle("Bonus Upgrades", "Off", "On", TunicArchipelago.Settings.BonusStatUpgradesEnabled ? 1 : 0, (OptionsGUIMultiSelect.MultiSelectAction)ToggleBonusStatUpgrades);
             OptionsGUI.addToggle("Disable Chest Interruption", "Off", "On", TunicArchipelago.Settings.DisableChestInterruption ? 1 : 0, (OptionsGUIMultiSelect.MultiSelectAction)ToggleChestInterruption);
@@ -214,6 +215,11 @@ namespace TunicArchipelago {
             SaveSettings();
         }
 
+        public static void ToggleClearEarlyBushes(int index) {
+            TunicArchipelago.Settings.ClearEarlyBushes = !TunicArchipelago.Settings.ClearEarlyBushes;
+            SaveSettings();
+        }
+
         public static void ToggleCheaperShopItems(int index) {
             TunicArchipelago.Settings.CheaperShopItemsEnabled = !TunicArchipelago.Settings.CheaperShopItemsEnabled;
             SaveSettings();
@@ -348,6 +354,11 @@ namespace TunicArchipelago {
                     button.specialBadge.gameObject.active = true;
                     button.specialBadge.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
                     button.specialBadge.transform.localPosition = new Vector3(-75f, -27f, 0f);
+                    
+                    if (SaveFile.GetInt(HexagonQuestEnabled) == 1) { 
+                        button.ngpBadge.gameObject.SetActive(true);
+                        button.ngpBadge.sprite = Inventory.GetItemByName("Hexagon Gold").icon;
+                    }
                     button.playtimeString.enableAutoSizing = false;
                     if (SaveFile.GetInt("archipelago") != 0) {
                         button.playtimeString.text += $" <size=65%>archipelago";

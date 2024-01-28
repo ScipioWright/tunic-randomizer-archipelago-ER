@@ -112,15 +112,6 @@ namespace TunicArchipelago {
             Items["Hexagon Green"] = ItemRoot.transform.GetChild(27).GetChild(0).gameObject;
             Items["Hexagon Blue"] = ItemRoot.transform.GetChild(28).GetChild(0).gameObject;
 
-            Items["Dath Stone"] = GameObject.Instantiate(ItemRoot.transform.GetChild(28).GetChild(0).gameObject);
-            Items["Dath Stone"].SetActive(false);
-            Material DathStoneMaterial = Items["Lantern"].GetComponent<MeshRenderer>().material;
-            DathStoneMaterial.color = new UnityEngine.Color(1, 1, 1);
-            Items["Dath Stone"].GetComponent<MeshRenderer>().material = DathStoneMaterial;
-            Items["Dath Stone"].GetComponent<MeshRenderer>().materials[0] = DathStoneMaterial;
-            GameObject.Destroy(Items["Dath Stone"].GetComponent<Rotate>());
-            GameObject.DontDestroyOnLoad(Items["Dath Stone"]);
-
             Items["money small"] = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ItemPickup>().Where(ItemPickup => ItemPickup.name == "Coin Pickup 1(Clone)").ToList()[0].gameObject.transform.GetChild(0).gameObject);
             Items["money medium"] = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ItemPickup>().Where(ItemPickup => ItemPickup.name == "Coin Pickup 2(Clone)").ToList()[0].gameObject.transform.GetChild(0).gameObject);
             Items["money large"] = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ItemPickup>().Where(ItemPickup => ItemPickup.name == "Coin Pickup 3(Clone)").ToList()[0].gameObject.transform.GetChild(0).gameObject);
@@ -149,6 +140,15 @@ namespace TunicArchipelago {
             }
 
             LoadTextures();
+
+            Items["Dath Stone"] = new GameObject();
+            Items["Dath Stone"].AddComponent<MeshFilter>().mesh = MeshData.CreateMesh(MeshData.DathStone);
+            Items["Dath Stone"].AddComponent<MeshRenderer>().material = FindMaterial("grass tuft");
+            Items["Dath Stone"].GetComponent<MeshRenderer>().material.mainTexture = CustomItemImages["Dath Stone Texture"].GetComponent<Image>().sprite.texture;
+            Items["Dath Stone"].GetComponent<MeshRenderer>().material.color = new Color(1, 1, 1, 1);
+            Items["Dath Stone"].SetActive(false);
+            Items["Dath Stone"].name = "dath stone";
+            GameObject.DontDestroyOnLoad(Items["Dath Stone"]);
 
             ItemPresentationPatches.SetupOldHouseKeyItemPresentation();
             Items["Key (House)"] = ItemRoot.transform.GetChild(48).gameObject;
@@ -392,7 +392,7 @@ namespace TunicArchipelago {
                 string ItemId = Chest.chestID == 0 ? $"{SceneLoaderPatches.SceneName}-{Chest.transform.position.ToString()} [{SceneLoaderPatches.SceneName}]" : $"{Chest.chestID} [{SceneLoaderPatches.SceneName}]";
                 if (ItemLookup.ItemList.ContainsKey(ItemId)) {
                     ArchipelagoItem APItem = ItemLookup.ItemList[ItemId];
-                    if (Archipelago.instance.GetPlayerGame(APItem.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
+                    if (!Archipelago.instance.IsTunicPlayer(APItem.Player) || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
                         Chest.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().materials = Chests["Normal"].GetComponent<MeshRenderer>().materials;
                         Chest.GetComponent<FMODUnity.StudioEventEmitter>().EventReference = Chests["Normal"].GetComponent<FMODUnity.StudioEventEmitter>().EventReference;
                         Chest.GetComponent<FMODUnity.StudioEventEmitter>().Lookup();
@@ -526,7 +526,7 @@ namespace TunicArchipelago {
                         if (ItemPickup.itemToGive.name == "Key" || ItemPickup.itemToGive.name == "Key (House)") {
                             NewItem.transform.parent.localRotation = SceneLoaderPatches.SceneName == "Overworld Redux" ? new Quaternion(0f, 0f, 0f, 0f) : new Quaternion(0f, 0.7071f, 0f, 0.7071f);
                         }
-                        if (Archipelago.instance.GetPlayerGame(Item.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
+                        if (!Archipelago.instance.IsTunicPlayer(Item.Player) || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
                             TransformData = ItemPositions.SpecificItemPlacement[ItemPickup.itemToGive.name]["Other World"];
                         } else {
                             ItemData ItemData = ItemLookup.Items[Item.ItemName];
@@ -596,7 +596,7 @@ namespace TunicArchipelago {
 
                     Page.transform.localRotation = Quaternion.Euler(0, 0, 0);
                     TransformData TransformData;
-                    if (Archipelago.instance.GetPlayerGame(APItem.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
+                    if (!Archipelago.instance.IsTunicPlayer(APItem.Player) || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
                         TransformData = ItemPositions.Techbow["Other World"];
                         PagePickup.transform.GetChild(2).GetComponent<Rotate>().eulerAnglesPerSecond = new Vector3(0f, 45f, 0f);
                     } else {
@@ -636,7 +636,7 @@ namespace TunicArchipelago {
         public static GameObject SetupItemBase(Transform Parent, ArchipelagoItem APItem) {
             GameObject NewItem;
             int Player = Archipelago.instance.GetPlayerSlot();
-            if (Archipelago.instance.GetPlayerGame(APItem.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
+            if (!Archipelago.instance.IsTunicPlayer(APItem.Player) || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
                 ItemFlags flag = APItem.Classification;
                 if (flag == ItemFlags.Trap) {
                     flag = new List<ItemFlags>() { ItemFlags.Advancement, ItemFlags.NeverExclude, ItemFlags.None}[new System.Random().Next(3)];
@@ -732,7 +732,7 @@ namespace TunicArchipelago {
                 GameObject NewItem = SetupItemBase(Plinth.transform, Item);
 
                 TransformData TransformData;
-                if (Archipelago.instance.GetPlayerGame(Item.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
+                if (!Archipelago.instance.IsTunicPlayer(Item.Player) || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
                     TransformData = ItemPositions.HexagonRed["Other World"];
                 } else {
                     ItemData HexagonItem = ItemLookup.Items[Item.ItemName];
@@ -788,7 +788,7 @@ namespace TunicArchipelago {
                 GameObject NewItem = SetupItemBase(Plinth.transform, Item);
 
                 TransformData TransformData;
-                if (Archipelago.instance.GetPlayerGame(Item.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
+                if (!Archipelago.instance.IsTunicPlayer(Item.Player) || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
                     TransformData = ItemPositions.HexagonRed["Other World"];
                 } else {
                     ItemData HexagonItem = ItemLookup.Items[Item.ItemName];
@@ -847,7 +847,7 @@ namespace TunicArchipelago {
                 GameObject NewItem = SetupItemBase(VaultKey.transform, Item);
 
                 TransformData TransformData;
-                if (Archipelago.instance.GetPlayerGame(Item.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
+                if (!Archipelago.instance.IsTunicPlayer(Item.Player) || !ItemLookup.Items.ContainsKey(Item.ItemName)) {
                     TransformData = ItemPositions.VaultKeyRed["Other World"];
                 } else {
                     ItemData VaultKeyItem = ItemLookup.Items[Item.ItemName];
@@ -902,7 +902,7 @@ namespace TunicArchipelago {
                     NewItem = SetupItemBase(ItemHolder.transform, APItem);
 
                     TransformData TransformData;
-                    if (Archipelago.instance.GetPlayerGame(APItem.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
+                    if (!Archipelago.instance.IsTunicPlayer(APItem.Player) || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
                         TransformData = ItemPositions.Shop["Other World"];
                     } else {
                         ItemData Item = ItemLookup.Items[APItem.ItemName];
@@ -941,7 +941,7 @@ namespace TunicArchipelago {
                         NewItem.transform.GetChild(j).gameObject.layer = 12;
                     }
 
-                    if (Archipelago.instance.GetPlayerGame(APItem.Player) == "Tunic" && APItem.ItemName.Contains("Ice Bomb")) {
+                    if (Archipelago.instance.IsTunicPlayer(APItem.Player) && APItem.ItemName.Contains("Ice Bomb")) {
                         NewItem.transform.GetChild(0).gameObject.SetActive(false);
                     }
 
@@ -967,7 +967,7 @@ namespace TunicArchipelago {
                 ArchipelagoItem APItem = ItemLookup.ItemList[ItemId];
                 GameObject NewItem = SetupItemBase(HeroRelicPickup.transform, APItem);
 
-                if (Archipelago.instance.GetPlayerGame(APItem.Player) != "Tunic" || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
+                if (!Archipelago.instance.IsTunicPlayer(APItem.Player) || !ItemLookup.Items.ContainsKey(APItem.ItemName)) {
                     if (NewItem.GetComponent<Rotate>() == null) {
                         NewItem.AddComponent<Rotate>().eulerAnglesPerSecond = new Vector3(0f, 45f, 0f);
                     }
@@ -1062,7 +1062,7 @@ namespace TunicArchipelago {
                             __instance.__4__this.transform.GetChild(0).GetChild(10).GetChild(0).GetChild(i).GetChild(0).gameObject.SetActive(true);
                             foreach (ShopItem shopItem in ShopManager.cachedShopItems) {
                                 if (ShopItemIDs.Contains($"{shopItem.name} [Shop]") && !Locations.CheckedLocations[$"{shopItem.name} [Shop]"]
-                                    && ItemLookup.ItemList[$"{shopItem.name} [Shop]"].ItemName.Contains("Ice Bomb") && Archipelago.instance.GetPlayerGame(ItemLookup.ItemList[$"{shopItem.name} [Shop]"].Player) == "Tunic") {
+                                    && ItemLookup.ItemList[$"{shopItem.name} [Shop]"].ItemName.Contains("Ice Bomb") && Archipelago.instance.IsTunicPlayer(ItemLookup.ItemList[$"{shopItem.name} [Shop]"].Player)) {
                                     shopItem.transform.GetChild(0).GetChild(1).GetChild(0).gameObject.SetActive(true);
                                 }
                             }
@@ -1109,6 +1109,8 @@ namespace TunicArchipelago {
             CustomItemImages.Add("Fool Trap", CreateSprite(ImageData.TinyFox, ImageMaterial, SpriteName: "Randomizer items_Fool Trap"));
             CustomItemImages.Add("Archipelago Item", CreateSprite(ImageData.ArchipelagoItem, ImageMaterial, 128, 128, SpriteName: "Randomizer items_Archipelago Item"));
             CustomItemImages.Add("Torch Redux", CreateSprite(ImageData.TorchRedux, ImageMaterial, 160, 160, SpriteName: "Randomizer items_Torch redux"));
+            CustomItemImages.Add("AbilityShuffle", CreateSprite(ImageData.Abilities, ImageMaterial, 200, 100, SpriteName: "Randomizer heading_Abilities"));
+            CustomItemImages.Add("Dath Stone Texture", CreateSprite(ImageData.DathSteneTexture, ImageMaterial, 200, 100, SpriteName: "Randomizer dath stone texture"));
 
             Inventory.GetItemByName("Librarian Sword").icon = CustomItemImages["Librarian Sword"].GetComponent<Image>().sprite;
             Inventory.GetItemByName("Heir Sword").icon = CustomItemImages["Heir Sword"].GetComponent<Image>().sprite;

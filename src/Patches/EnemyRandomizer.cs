@@ -59,6 +59,12 @@ namespace TunicArchipelago {
                 }
             },
             {
+                "Sewer",
+                new List<string>() {
+                    "Spinnerbot (3)",
+                }
+            },
+            {
                 "Archipelagos Redux",
                 new List<string>() {
                     "crocodoo Voidtouched",
@@ -73,10 +79,7 @@ namespace TunicArchipelago {
                 new List<string>() {
                     "plover",
                     "Crow",
-                    "Crabbit",
-                    "Crabbo (1)",
                     "Crabbit with Shell",
-                    "Spinnerbot Corrupted",
                     "Spinnerbot Baby",
                 }
             },
@@ -326,10 +329,10 @@ namespace TunicArchipelago {
             Dictionary<string, string> RenamedEnemies = new Dictionary<string, string>() {
                 { "_Turret", "Turret" },
                 { "Fairyprobe Archipelagos (2)", "Fairyprobe Archipelagos" },
-                { "Crabbo (1)", "Crabbo" },
                 { "Frog (7)", "Frog" },
                 { "Hedgehog Trap (1)", "Hedgehog Trap" },
                 { "Centipede from egg (Varient)", "Centipede" },
+                { "Spinnerbot (3)", "Spinnerbot Corrupted" },
             };
             foreach (string LocationEnemy in LocationEnemies[SceneName]) {
                 string EnemyName = LocationEnemy;
@@ -357,6 +360,27 @@ namespace TunicArchipelago {
                 if (EnemyName == "Centipede") {
                     Enemies[EnemyName].GetComponent<Centipede>().maxBeamDistance = 10f;
                     Enemies[EnemyName].GetComponent<Centipede>().attackDistance = 5f;
+                }
+                if (EnemyName == "Crabbit with Shell") {
+                    Enemies["Crabbit"] = GameObject.Instantiate(Enemies[EnemyName]);
+                    Enemies["Crabbit"].name = "Crabbit Prefab";
+                    GameObject.Destroy(Enemies["Crabbit"].transform.GetChild(4).gameObject);
+                    Enemies["Crabbit"].SetActive(false);
+                    GameObject.DontDestroyOnLoad(Enemies["Crabbit"]);
+
+                    GameObject Crabbo = Resources.FindObjectsOfTypeAll<Crabbo>().Where(crab => crab.name == "Crabbo (1)").First().gameObject;
+
+                    Enemies["Crabbo"] = GameObject.Instantiate(Enemies[EnemyName]);
+                    Enemies["Crabbo"].name = "Crabbo Prefab";
+                    GameObject.Destroy(Enemies["Crabbo"].transform.GetChild(4).gameObject);
+                    Enemies["Crabbo"].transform.localScale = Vector3.one;
+                    Enemies["Crabbo"].transform.GetChild(1).GetComponent<CreatureMaterialManager>().originalMaterials = Crabbo.transform.GetChild(1).GetComponent<CreatureMaterialManager>().originalMaterials;
+                    Enemies["Crabbo"].transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().materials = Crabbo.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().materials;
+                    Enemies["Crabbo"].GetComponent<HitReceiver>().blockEnabled = true;
+                    Enemies["Crabbo"].GetComponent<Crabbo>().attackDistance = 5f;
+                    Enemies["Crabbo"].GetComponent<Crabbo>().averageAttackCooldown = 1.25f;
+                    Enemies["Crabbo"].SetActive(false);
+                    GameObject.DontDestroyOnLoad(Enemies["Crabbo"]);
                 }
 
                 Enemies[EnemyName].name = EnemyName + " Prefab";
@@ -571,6 +595,20 @@ namespace TunicArchipelago {
                         NewEnemy.GetComponent<Scavenger>().useStunBulletPool = NewEnemy.name.Contains("stunner");
                         if (NewEnemy.name.Contains("stunner")) {
                             NewEnemy.GetComponent<Scavenger>().laserEndSphere = Enemies["Scavenger"].GetComponent<Scavenger>().laserEndSphere;
+                        }
+                    }
+
+                    if (NewEnemy.name.Contains("Spinnerbot Corrupted") && Random.Next(100) == 99) {
+                        NewEnemy.transform.localScale = new Vector3(2f, 2f, 2f);
+                        NewEnemy.GetComponent<Monster>().defaultStartingMaxHP._value = 30;
+                    }
+
+                    if (NewEnemy.name.Contains("Crabbo") && NewEnemy.GetComponent<Crabbo>() != null) {
+                        if (NewEnemy.GetComponent<Monster>().animatorSpeedMultiplier != null) {
+                            NewEnemy.GetComponent<Monster>().animatorSpeedMultiplier.Value = 1f;
+                        }
+                        if (NewEnemy.GetComponent<Monster>().defaultStartingMaxHP != null) {
+                            NewEnemy.GetComponent<Monster>().defaultStartingMaxHP.Value = 50f;
                         }
                     }
 
